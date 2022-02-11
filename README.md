@@ -1,14 +1,51 @@
-# Udacity Blockchain Capstone
+# Real Estate NFT
 
-The capstone will build upon the knowledge you have gained in the course in order to build a decentralized housing product. 
+This project was developed as part of the [Udacity Blockchain Developer Nanodegree Program](https://www.udacity.com/course/blockchain-developer-nanodegree--nd1309)
 
-# Project Resources
+This project lets you mint NFTs to represent your 
+title to properties. 
+Before you can mint a NFTs, you need to verify you own the property. 
+It uses zk-SNARKs using [ZoKrates](https://zokrates.github.io/) to create a verification 
+system which can prove you have title to the property without revealing 
+that specific information on the property. 
+Minted tokens can be transferred to other addresses. 
 
-* [Remix - Solidity IDE](https://remix.ethereum.org/)
-* [Visual Studio Code](https://code.visualstudio.com/)
-* [Truffle Framework](https://truffleframework.com/)
-* [Ganache - One Click Blockchain](https://truffleframework.com/ganache)
-* [Open Zeppelin ](https://openzeppelin.org/)
-* [Interactive zero knowledge 3-colorability demonstration](http://web.mit.edu/~ezyang/Public/graph/svg.html)
-* [Docker](https://docs.docker.com/install/)
-* [ZoKrates](https://github.com/Zokrates/ZoKrates)
+## Local development
+
+Start development console and local ethereum blockchain:
+```shell script
+truffle develop 
+```
+Compile the solidity contracts:
+```shell script
+compile
+```
+Deploy (migrate) contracts to network
+```shell script
+migrate --reset  # local network
+migrate --reset --network rinkeby  # rinkeby test network
+```
+Run unit tests
+```shell script
+test
+```
+
+
+## Rinkeby network
+
+This project is deployed to the rinkeby test network:
+
+- Token Name: *RealEstateToken*
+- Token Symbol: *RST*
+- Contract address: [0xEB6f785407218E4f0344D4ec72fC572095C48EDf](https://rinkeby.etherscan.io/address/0xEB6f785407218E4f0344D4ec72fC572095C48EDf)
+
+## OpenSea
+
+10 Nfts are minted and can be traded on OpenSea (testnet):
+- [OpenSea RealEstateToken Collection](https://testnets.opensea.io/collection/realestatetoken-udacity)
+
+## Libraries:
+
+- Node v10.24.1
+- Truffle v5.2.0
+- Solidity v0.5.6

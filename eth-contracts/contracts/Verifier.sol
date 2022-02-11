@@ -1,19 +1,25 @@
 // This file is LGPL3 Licensed
 
+// NOTE: I used this answert to create the verifier contract:
+// https://knowledge.udacity.com/questions/49213
+
 /**
  * @title Elliptic curve operations on twist points for alt_bn128
  * @author Mustafa Al-Bassam (mus@musalbas.com)
  */
 library BN256G2 {
-    uint256 internal constant FIELD_MODULUS = 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47;
-    uint256 internal constant TWISTBX = 0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5;
-    uint256 internal constant TWISTBY = 0x9713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2;
-    uint internal constant PTXX = 0;
-    uint internal constant PTXY = 1;
-    uint internal constant PTYX = 2;
-    uint internal constant PTYY = 3;
-    uint internal constant PTZX = 4;
-    uint internal constant PTZY = 5;
+    uint256 internal constant FIELD_MODULUS =
+        0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47;
+    uint256 internal constant TWISTBX =
+        0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5;
+    uint256 internal constant TWISTBY =
+        0x9713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2;
+    uint256 internal constant PTXX = 0;
+    uint256 internal constant PTXY = 1;
+    uint256 internal constant PTYX = 2;
+    uint256 internal constant PTYY = 3;
+    uint256 internal constant PTZX = 4;
+    uint256 internal constant PTZY = 5;
 
     /**
      * @notice Add two twist points
@@ -28,68 +34,61 @@ library BN256G2 {
      * @return (pt3xx, pt3xy, pt3yx, pt3yy)
      */
     function ECTwistAdd(
-        uint256 pt1xx, uint256 pt1xy,
-        uint256 pt1yx, uint256 pt1yy,
-        uint256 pt2xx, uint256 pt2xy,
-        uint256 pt2yx, uint256 pt2yy
-    ) public pure returns (
-        uint256, uint256,
-        uint256, uint256
-    ) {
-        if (
-            pt1xx == 0 && pt1xy == 0 &&
-            pt1yx == 0 && pt1yy == 0
-        ) {
-            if (!(
-                pt2xx == 0 && pt2xy == 0 &&
-                pt2yx == 0 && pt2yy == 0
-            )) {
-                assert(_isOnCurve(
-                    pt2xx, pt2xy,
-                    pt2yx, pt2yy
-                ));
+        uint256 pt1xx,
+        uint256 pt1xy,
+        uint256 pt1yx,
+        uint256 pt1yy,
+        uint256 pt2xx,
+        uint256 pt2xy,
+        uint256 pt2yx,
+        uint256 pt2yy
+    )
+        public
+        pure
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
+        if (pt1xx == 0 && pt1xy == 0 && pt1yx == 0 && pt1yy == 0) {
+            if (!(pt2xx == 0 && pt2xy == 0 && pt2yx == 0 && pt2yy == 0)) {
+                assert(_isOnCurve(pt2xx, pt2xy, pt2yx, pt2yy));
             }
-            return (
-                pt2xx, pt2xy,
-                pt2yx, pt2yy
-            );
-        } else if (
-            pt2xx == 0 && pt2xy == 0 &&
-            pt2yx == 0 && pt2yy == 0
-        ) {
-            assert(_isOnCurve(
-                pt1xx, pt1xy,
-                pt1yx, pt1yy
-            ));
-            return (
-                pt1xx, pt1xy,
-                pt1yx, pt1yy
-            );
+            return (pt2xx, pt2xy, pt2yx, pt2yy);
+        } else if (pt2xx == 0 && pt2xy == 0 && pt2yx == 0 && pt2yy == 0) {
+            assert(_isOnCurve(pt1xx, pt1xy, pt1yx, pt1yy));
+            return (pt1xx, pt1xy, pt1yx, pt1yy);
         }
 
-        assert(_isOnCurve(
-            pt1xx, pt1xy,
-            pt1yx, pt1yy
-        ));
-        assert(_isOnCurve(
-            pt2xx, pt2xy,
-            pt2yx, pt2yy
-        ));
+        assert(_isOnCurve(pt1xx, pt1xy, pt1yx, pt1yy));
+        assert(_isOnCurve(pt2xx, pt2xy, pt2yx, pt2yy));
 
         uint256[6] memory pt3 = _ECTwistAddJacobian(
-            pt1xx, pt1xy,
-            pt1yx, pt1yy,
-            1,     0,
-            pt2xx, pt2xy,
-            pt2yx, pt2yy,
-            1,     0
+            pt1xx,
+            pt1xy,
+            pt1yx,
+            pt1yy,
+            1,
+            0,
+            pt2xx,
+            pt2xy,
+            pt2yx,
+            pt2yy,
+            1,
+            0
         );
 
-        return _fromJacobian(
-            pt3[PTXX], pt3[PTXY],
-            pt3[PTYX], pt3[PTYY],
-            pt3[PTZX], pt3[PTZY]
-        );
+        return
+            _fromJacobian(
+                pt3[PTXX],
+                pt3[PTXY],
+                pt3[PTYX],
+                pt3[PTYY],
+                pt3[PTZX],
+                pt3[PTZY]
+            );
     }
 
     /**
@@ -103,39 +102,48 @@ library BN256G2 {
      */
     function ECTwistMul(
         uint256 s,
-        uint256 pt1xx, uint256 pt1xy,
-        uint256 pt1yx, uint256 pt1yy
-    ) public pure returns (
-        uint256, uint256,
-        uint256, uint256
-    ) {
+        uint256 pt1xx,
+        uint256 pt1xy,
+        uint256 pt1yx,
+        uint256 pt1yy
+    )
+        public
+        pure
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
         uint256 pt1zx = 1;
-        if (
-            pt1xx == 0 && pt1xy == 0 &&
-            pt1yx == 0 && pt1yy == 0
-        ) {
+        if (pt1xx == 0 && pt1xy == 0 && pt1yx == 0 && pt1yy == 0) {
             pt1xx = 1;
             pt1yx = 1;
             pt1zx = 0;
         } else {
-            assert(_isOnCurve(
-                pt1xx, pt1xy,
-                pt1yx, pt1yy
-            ));
+            assert(_isOnCurve(pt1xx, pt1xy, pt1yx, pt1yy));
         }
 
         uint256[6] memory pt2 = _ECTwistMulJacobian(
             s,
-            pt1xx, pt1xy,
-            pt1yx, pt1yy,
-            pt1zx, 0
+            pt1xx,
+            pt1xy,
+            pt1yx,
+            pt1yy,
+            pt1zx,
+            0
         );
 
-        return _fromJacobian(
-            pt2[PTXX], pt2[PTXY],
-            pt2[PTYX], pt2[PTYY],
-            pt2[PTZX], pt2[PTZY]
-        );
+        return
+            _fromJacobian(
+                pt2[PTXX],
+                pt2[PTXY],
+                pt2[PTYX],
+                pt2[PTYY],
+                pt2[PTZX],
+                pt2[PTZY]
+            );
     }
 
     /**
@@ -146,60 +154,83 @@ library BN256G2 {
         return FIELD_MODULUS;
     }
 
-    function submod(uint256 a, uint256 b, uint256 n) internal pure returns (uint256) {
+    function submod(
+        uint256 a,
+        uint256 b,
+        uint256 n
+    ) internal pure returns (uint256) {
         return addmod(a, n - b, n);
     }
 
     function _FQ2Mul(
-        uint256 xx, uint256 xy,
-        uint256 yx, uint256 yy
-    ) internal pure returns(uint256, uint256) {
+        uint256 xx,
+        uint256 xy,
+        uint256 yx,
+        uint256 yy
+    ) internal pure returns (uint256, uint256) {
         return (
-            submod(mulmod(xx, yx, FIELD_MODULUS), mulmod(xy, yy, FIELD_MODULUS), FIELD_MODULUS),
-            addmod(mulmod(xx, yy, FIELD_MODULUS), mulmod(xy, yx, FIELD_MODULUS), FIELD_MODULUS)
+            submod(
+                mulmod(xx, yx, FIELD_MODULUS),
+                mulmod(xy, yy, FIELD_MODULUS),
+                FIELD_MODULUS
+            ),
+            addmod(
+                mulmod(xx, yy, FIELD_MODULUS),
+                mulmod(xy, yx, FIELD_MODULUS),
+                FIELD_MODULUS
+            )
         );
     }
 
     function _FQ2Muc(
-        uint256 xx, uint256 xy,
+        uint256 xx,
+        uint256 xy,
         uint256 c
-    ) internal pure returns(uint256, uint256) {
-        return (
-            mulmod(xx, c, FIELD_MODULUS),
-            mulmod(xy, c, FIELD_MODULUS)
-        );
+    ) internal pure returns (uint256, uint256) {
+        return (mulmod(xx, c, FIELD_MODULUS), mulmod(xy, c, FIELD_MODULUS));
     }
 
     function _FQ2Add(
-        uint256 xx, uint256 xy,
-        uint256 yx, uint256 yy
-    ) internal pure returns(uint256, uint256) {
-        return (
-            addmod(xx, yx, FIELD_MODULUS),
-            addmod(xy, yy, FIELD_MODULUS)
-        );
+        uint256 xx,
+        uint256 xy,
+        uint256 yx,
+        uint256 yy
+    ) internal pure returns (uint256, uint256) {
+        return (addmod(xx, yx, FIELD_MODULUS), addmod(xy, yy, FIELD_MODULUS));
     }
 
     function _FQ2Sub(
-        uint256 xx, uint256 xy,
-        uint256 yx, uint256 yy
-    ) internal pure returns(uint256 rx, uint256 ry) {
-        return (
-            submod(xx, yx, FIELD_MODULUS),
-            submod(xy, yy, FIELD_MODULUS)
-        );
+        uint256 xx,
+        uint256 xy,
+        uint256 yx,
+        uint256 yy
+    ) internal pure returns (uint256 rx, uint256 ry) {
+        return (submod(xx, yx, FIELD_MODULUS), submod(xy, yy, FIELD_MODULUS));
     }
 
     function _FQ2Div(
-        uint256 xx, uint256 xy,
-        uint256 yx, uint256 yy
-    ) internal pure returns(uint256, uint256) {
+        uint256 xx,
+        uint256 xy,
+        uint256 yx,
+        uint256 yy
+    ) internal pure returns (uint256, uint256) {
         (yx, yy) = _FQ2Inv(yx, yy);
         return _FQ2Mul(xx, xy, yx, yy);
     }
 
-    function _FQ2Inv(uint256 x, uint256 y) internal pure returns(uint256, uint256) {
-        uint256 inv = _modInv(addmod(mulmod(y, y, FIELD_MODULUS), mulmod(x, x, FIELD_MODULUS), FIELD_MODULUS), FIELD_MODULUS);
+    function _FQ2Inv(uint256 x, uint256 y)
+        internal
+        pure
+        returns (uint256, uint256)
+    {
+        uint256 inv = _modInv(
+            addmod(
+                mulmod(y, y, FIELD_MODULUS),
+                mulmod(x, x, FIELD_MODULUS),
+                FIELD_MODULUS
+            ),
+            FIELD_MODULUS
+        );
         return (
             mulmod(x, inv, FIELD_MODULUS),
             FIELD_MODULUS - mulmod(y, inv, FIELD_MODULUS)
@@ -207,8 +238,10 @@ library BN256G2 {
     }
 
     function _isOnCurve(
-        uint256 xx, uint256 xy,
-        uint256 yx, uint256 yy
+        uint256 xx,
+        uint256 xy,
+        uint256 yx,
+        uint256 yy
     ) internal pure returns (bool) {
         uint256 yyx;
         uint256 yyy;
@@ -222,7 +255,7 @@ library BN256G2 {
         return yyx == 0 && yyy == 0;
     }
 
-    function _modInv(uint256 a, uint256 n) internal pure returns(uint256 t) {
+    function _modInv(uint256 a, uint256 n) internal pure returns (uint256 t) {
         t = 0;
         uint256 newT = 1;
         uint256 r = n;
@@ -236,13 +269,22 @@ library BN256G2 {
     }
 
     function _fromJacobian(
-        uint256 pt1xx, uint256 pt1xy,
-        uint256 pt1yx, uint256 pt1yy,
-        uint256 pt1zx, uint256 pt1zy
-    ) internal pure returns (
-        uint256 pt2xx, uint256 pt2xy,
-        uint256 pt2yx, uint256 pt2yy
-    ) {
+        uint256 pt1xx,
+        uint256 pt1xy,
+        uint256 pt1yx,
+        uint256 pt1yy,
+        uint256 pt1zx,
+        uint256 pt1zy
+    )
+        internal
+        pure
+        returns (
+            uint256 pt2xx,
+            uint256 pt2xy,
+            uint256 pt2yx,
+            uint256 pt2yy
+        )
+    {
         uint256 invzx;
         uint256 invzy;
         (invzx, invzy) = _FQ2Inv(pt1zx, pt1zy);
@@ -251,143 +293,175 @@ library BN256G2 {
     }
 
     function _ECTwistAddJacobian(
-        uint256 pt1xx, uint256 pt1xy,
-        uint256 pt1yx, uint256 pt1yy,
-        uint256 pt1zx, uint256 pt1zy,
-        uint256 pt2xx, uint256 pt2xy,
-        uint256 pt2yx, uint256 pt2yy,
-        uint256 pt2zx, uint256 pt2zy) internal pure returns (uint256[6] memory pt3) {
-            if (pt1zx == 0 && pt1zy == 0) {
+        uint256 pt1xx,
+        uint256 pt1xy,
+        uint256 pt1yx,
+        uint256 pt1yy,
+        uint256 pt1zx,
+        uint256 pt1zy,
+        uint256 pt2xx,
+        uint256 pt2xy,
+        uint256 pt2yx,
+        uint256 pt2yy,
+        uint256 pt2zx,
+        uint256 pt2zy
+    ) internal pure returns (uint256[6] memory pt3) {
+        if (pt1zx == 0 && pt1zy == 0) {
+            (
+                pt3[PTXX],
+                pt3[PTXY],
+                pt3[PTYX],
+                pt3[PTYY],
+                pt3[PTZX],
+                pt3[PTZY]
+            ) = (pt2xx, pt2xy, pt2yx, pt2yy, pt2zx, pt2zy);
+            return pt3;
+        } else if (pt2zx == 0 && pt2zy == 0) {
+            (
+                pt3[PTXX],
+                pt3[PTXY],
+                pt3[PTYX],
+                pt3[PTYY],
+                pt3[PTZX],
+                pt3[PTZY]
+            ) = (pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, pt1zy);
+            return pt3;
+        }
+
+        (pt2yx, pt2yy) = _FQ2Mul(pt2yx, pt2yy, pt1zx, pt1zy); // U1 = y2 * z1
+        (pt3[PTYX], pt3[PTYY]) = _FQ2Mul(pt1yx, pt1yy, pt2zx, pt2zy); // U2 = y1 * z2
+        (pt2xx, pt2xy) = _FQ2Mul(pt2xx, pt2xy, pt1zx, pt1zy); // V1 = x2 * z1
+        (pt3[PTZX], pt3[PTZY]) = _FQ2Mul(pt1xx, pt1xy, pt2zx, pt2zy); // V2 = x1 * z2
+
+        if (pt2xx == pt3[PTZX] && pt2xy == pt3[PTZY]) {
+            if (pt2yx == pt3[PTYX] && pt2yy == pt3[PTYY]) {
                 (
-                    pt3[PTXX], pt3[PTXY],
-                    pt3[PTYX], pt3[PTYY],
-                    pt3[PTZX], pt3[PTZY]
-                ) = (
-                    pt2xx, pt2xy,
-                    pt2yx, pt2yy,
-                    pt2zx, pt2zy
-                );
-                return pt3;
-            } else if (pt2zx == 0 && pt2zy == 0) {
-                (
-                    pt3[PTXX], pt3[PTXY],
-                    pt3[PTYX], pt3[PTYY],
-                    pt3[PTZX], pt3[PTZY]
-                ) = (
-                    pt1xx, pt1xy,
-                    pt1yx, pt1yy,
-                    pt1zx, pt1zy
+                    pt3[PTXX],
+                    pt3[PTXY],
+                    pt3[PTYX],
+                    pt3[PTYY],
+                    pt3[PTZX],
+                    pt3[PTZY]
+                ) = _ECTwistDoubleJacobian(
+                    pt1xx,
+                    pt1xy,
+                    pt1yx,
+                    pt1yy,
+                    pt1zx,
+                    pt1zy
                 );
                 return pt3;
             }
+            (
+                pt3[PTXX],
+                pt3[PTXY],
+                pt3[PTYX],
+                pt3[PTYY],
+                pt3[PTZX],
+                pt3[PTZY]
+            ) = (1, 0, 1, 0, 0, 0);
+            return pt3;
+        }
 
-            (pt2yx,     pt2yy)     = _FQ2Mul(pt2yx, pt2yy, pt1zx, pt1zy); // U1 = y2 * z1
-            (pt3[PTYX], pt3[PTYY]) = _FQ2Mul(pt1yx, pt1yy, pt2zx, pt2zy); // U2 = y1 * z2
-            (pt2xx,     pt2xy)     = _FQ2Mul(pt2xx, pt2xy, pt1zx, pt1zy); // V1 = x2 * z1
-            (pt3[PTZX], pt3[PTZY]) = _FQ2Mul(pt1xx, pt1xy, pt2zx, pt2zy); // V2 = x1 * z2
-
-            if (pt2xx == pt3[PTZX] && pt2xy == pt3[PTZY]) {
-                if (pt2yx == pt3[PTYX] && pt2yy == pt3[PTYY]) {
-                    (
-                        pt3[PTXX], pt3[PTXY],
-                        pt3[PTYX], pt3[PTYY],
-                        pt3[PTZX], pt3[PTZY]
-                    ) = _ECTwistDoubleJacobian(pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, pt1zy);
-                    return pt3;
-                }
-                (
-                    pt3[PTXX], pt3[PTXY],
-                    pt3[PTYX], pt3[PTYY],
-                    pt3[PTZX], pt3[PTZY]
-                ) = (
-                    1, 0,
-                    1, 0,
-                    0, 0
-                );
-                return pt3;
-            }
-
-            (pt2zx,     pt2zy)     = _FQ2Mul(pt1zx, pt1zy, pt2zx,     pt2zy);     // W = z1 * z2
-            (pt1xx,     pt1xy)     = _FQ2Sub(pt2yx, pt2yy, pt3[PTYX], pt3[PTYY]); // U = U1 - U2
-            (pt1yx,     pt1yy)     = _FQ2Sub(pt2xx, pt2xy, pt3[PTZX], pt3[PTZY]); // V = V1 - V2
-            (pt1zx,     pt1zy)     = _FQ2Mul(pt1yx, pt1yy, pt1yx,     pt1yy);     // V_squared = V * V
-            (pt2yx,     pt2yy)     = _FQ2Mul(pt1zx, pt1zy, pt3[PTZX], pt3[PTZY]); // V_squared_times_V2 = V_squared * V2
-            (pt1zx,     pt1zy)     = _FQ2Mul(pt1zx, pt1zy, pt1yx,     pt1yy);     // V_cubed = V * V_squared
-            (pt3[PTZX], pt3[PTZY]) = _FQ2Mul(pt1zx, pt1zy, pt2zx,     pt2zy);     // newz = V_cubed * W
-            (pt2xx,     pt2xy)     = _FQ2Mul(pt1xx, pt1xy, pt1xx,     pt1xy);     // U * U
-            (pt2xx,     pt2xy)     = _FQ2Mul(pt2xx, pt2xy, pt2zx,     pt2zy);     // U * U * W
-            (pt2xx,     pt2xy)     = _FQ2Sub(pt2xx, pt2xy, pt1zx,     pt1zy);     // U * U * W - V_cubed
-            (pt2zx,     pt2zy)     = _FQ2Muc(pt2yx, pt2yy, 2);                    // 2 * V_squared_times_V2
-            (pt2xx,     pt2xy)     = _FQ2Sub(pt2xx, pt2xy, pt2zx,     pt2zy);     // A = U * U * W - V_cubed - 2 * V_squared_times_V2
-            (pt3[PTXX], pt3[PTXY]) = _FQ2Mul(pt1yx, pt1yy, pt2xx,     pt2xy);     // newx = V * A
-            (pt1yx,     pt1yy)     = _FQ2Sub(pt2yx, pt2yy, pt2xx,     pt2xy);     // V_squared_times_V2 - A
-            (pt1yx,     pt1yy)     = _FQ2Mul(pt1xx, pt1xy, pt1yx,     pt1yy);     // U * (V_squared_times_V2 - A)
-            (pt1xx,     pt1xy)     = _FQ2Mul(pt1zx, pt1zy, pt3[PTYX], pt3[PTYY]); // V_cubed * U2
-            (pt3[PTYX], pt3[PTYY]) = _FQ2Sub(pt1yx, pt1yy, pt1xx,     pt1xy);     // newy = U * (V_squared_times_V2 - A) - V_cubed * U2
+        (pt2zx, pt2zy) = _FQ2Mul(pt1zx, pt1zy, pt2zx, pt2zy); // W = z1 * z2
+        (pt1xx, pt1xy) = _FQ2Sub(pt2yx, pt2yy, pt3[PTYX], pt3[PTYY]); // U = U1 - U2
+        (pt1yx, pt1yy) = _FQ2Sub(pt2xx, pt2xy, pt3[PTZX], pt3[PTZY]); // V = V1 - V2
+        (pt1zx, pt1zy) = _FQ2Mul(pt1yx, pt1yy, pt1yx, pt1yy); // V_squared = V * V
+        (pt2yx, pt2yy) = _FQ2Mul(pt1zx, pt1zy, pt3[PTZX], pt3[PTZY]); // V_squared_times_V2 = V_squared * V2
+        (pt1zx, pt1zy) = _FQ2Mul(pt1zx, pt1zy, pt1yx, pt1yy); // V_cubed = V * V_squared
+        (pt3[PTZX], pt3[PTZY]) = _FQ2Mul(pt1zx, pt1zy, pt2zx, pt2zy); // newz = V_cubed * W
+        (pt2xx, pt2xy) = _FQ2Mul(pt1xx, pt1xy, pt1xx, pt1xy); // U * U
+        (pt2xx, pt2xy) = _FQ2Mul(pt2xx, pt2xy, pt2zx, pt2zy); // U * U * W
+        (pt2xx, pt2xy) = _FQ2Sub(pt2xx, pt2xy, pt1zx, pt1zy); // U * U * W - V_cubed
+        (pt2zx, pt2zy) = _FQ2Muc(pt2yx, pt2yy, 2); // 2 * V_squared_times_V2
+        (pt2xx, pt2xy) = _FQ2Sub(pt2xx, pt2xy, pt2zx, pt2zy); // A = U * U * W - V_cubed - 2 * V_squared_times_V2
+        (pt3[PTXX], pt3[PTXY]) = _FQ2Mul(pt1yx, pt1yy, pt2xx, pt2xy); // newx = V * A
+        (pt1yx, pt1yy) = _FQ2Sub(pt2yx, pt2yy, pt2xx, pt2xy); // V_squared_times_V2 - A
+        (pt1yx, pt1yy) = _FQ2Mul(pt1xx, pt1xy, pt1yx, pt1yy); // U * (V_squared_times_V2 - A)
+        (pt1xx, pt1xy) = _FQ2Mul(pt1zx, pt1zy, pt3[PTYX], pt3[PTYY]); // V_cubed * U2
+        (pt3[PTYX], pt3[PTYY]) = _FQ2Sub(pt1yx, pt1yy, pt1xx, pt1xy); // newy = U * (V_squared_times_V2 - A) - V_cubed * U2
     }
 
     function _ECTwistDoubleJacobian(
-        uint256 pt1xx, uint256 pt1xy,
-        uint256 pt1yx, uint256 pt1yy,
-        uint256 pt1zx, uint256 pt1zy
-    ) internal pure returns(
-        uint256 pt2xx, uint256 pt2xy,
-        uint256 pt2yx, uint256 pt2yy,
-        uint256 pt2zx, uint256 pt2zy
-    ) {
-        (pt2xx, pt2xy) = _FQ2Muc(pt1xx, pt1xy, 3);            // 3 * x
+        uint256 pt1xx,
+        uint256 pt1xy,
+        uint256 pt1yx,
+        uint256 pt1yy,
+        uint256 pt1zx,
+        uint256 pt1zy
+    )
+        internal
+        pure
+        returns (
+            uint256 pt2xx,
+            uint256 pt2xy,
+            uint256 pt2yx,
+            uint256 pt2yy,
+            uint256 pt2zx,
+            uint256 pt2zy
+        )
+    {
+        (pt2xx, pt2xy) = _FQ2Muc(pt1xx, pt1xy, 3); // 3 * x
         (pt2xx, pt2xy) = _FQ2Mul(pt2xx, pt2xy, pt1xx, pt1xy); // W = 3 * x * x
         (pt1zx, pt1zy) = _FQ2Mul(pt1yx, pt1yy, pt1zx, pt1zy); // S = y * z
         (pt2yx, pt2yy) = _FQ2Mul(pt1xx, pt1xy, pt1yx, pt1yy); // x * y
         (pt2yx, pt2yy) = _FQ2Mul(pt2yx, pt2yy, pt1zx, pt1zy); // B = x * y * S
         (pt1xx, pt1xy) = _FQ2Mul(pt2xx, pt2xy, pt2xx, pt2xy); // W * W
-        (pt2zx, pt2zy) = _FQ2Muc(pt2yx, pt2yy, 8);            // 8 * B
+        (pt2zx, pt2zy) = _FQ2Muc(pt2yx, pt2yy, 8); // 8 * B
         (pt1xx, pt1xy) = _FQ2Sub(pt1xx, pt1xy, pt2zx, pt2zy); // H = W * W - 8 * B
         (pt2zx, pt2zy) = _FQ2Mul(pt1zx, pt1zy, pt1zx, pt1zy); // S_squared = S * S
-        (pt2yx, pt2yy) = _FQ2Muc(pt2yx, pt2yy, 4);            // 4 * B
+        (pt2yx, pt2yy) = _FQ2Muc(pt2yx, pt2yy, 4); // 4 * B
         (pt2yx, pt2yy) = _FQ2Sub(pt2yx, pt2yy, pt1xx, pt1xy); // 4 * B - H
         (pt2yx, pt2yy) = _FQ2Mul(pt2yx, pt2yy, pt2xx, pt2xy); // W * (4 * B - H)
-        (pt2xx, pt2xy) = _FQ2Muc(pt1yx, pt1yy, 8);            // 8 * y
+        (pt2xx, pt2xy) = _FQ2Muc(pt1yx, pt1yy, 8); // 8 * y
         (pt2xx, pt2xy) = _FQ2Mul(pt2xx, pt2xy, pt1yx, pt1yy); // 8 * y * y
         (pt2xx, pt2xy) = _FQ2Mul(pt2xx, pt2xy, pt2zx, pt2zy); // 8 * y * y * S_squared
         (pt2yx, pt2yy) = _FQ2Sub(pt2yx, pt2yy, pt2xx, pt2xy); // newy = W * (4 * B - H) - 8 * y * y * S_squared
-        (pt2xx, pt2xy) = _FQ2Muc(pt1xx, pt1xy, 2);            // 2 * H
+        (pt2xx, pt2xy) = _FQ2Muc(pt1xx, pt1xy, 2); // 2 * H
         (pt2xx, pt2xy) = _FQ2Mul(pt2xx, pt2xy, pt1zx, pt1zy); // newx = 2 * H * S
         (pt2zx, pt2zy) = _FQ2Mul(pt1zx, pt1zy, pt2zx, pt2zy); // S * S_squared
-        (pt2zx, pt2zy) = _FQ2Muc(pt2zx, pt2zy, 8);            // newz = 8 * S * S_squared
+        (pt2zx, pt2zy) = _FQ2Muc(pt2zx, pt2zy, 8); // newz = 8 * S * S_squared
     }
 
     function _ECTwistMulJacobian(
         uint256 d,
-        uint256 pt1xx, uint256 pt1xy,
-        uint256 pt1yx, uint256 pt1yy,
-        uint256 pt1zx, uint256 pt1zy
-    ) internal pure returns(uint256[6] memory pt2) {
+        uint256 pt1xx,
+        uint256 pt1xy,
+        uint256 pt1yx,
+        uint256 pt1yy,
+        uint256 pt1zx,
+        uint256 pt1zy
+    ) internal pure returns (uint256[6] memory pt2) {
         while (d != 0) {
             if ((d & 1) != 0) {
                 pt2 = _ECTwistAddJacobian(
-                    pt2[PTXX], pt2[PTXY],
-                    pt2[PTYX], pt2[PTYY],
-                    pt2[PTZX], pt2[PTZY],
-                    pt1xx, pt1xy,
-                    pt1yx, pt1yy,
-                    pt1zx, pt1zy);
+                    pt2[PTXX],
+                    pt2[PTXY],
+                    pt2[PTYX],
+                    pt2[PTYY],
+                    pt2[PTZX],
+                    pt2[PTZY],
+                    pt1xx,
+                    pt1xy,
+                    pt1yx,
+                    pt1yy,
+                    pt1zx,
+                    pt1zy
+                );
             }
-            (
-                pt1xx, pt1xy,
-                pt1yx, pt1yy,
-                pt1zx, pt1zy
-            ) = _ECTwistDoubleJacobian(
-                pt1xx, pt1xy,
-                pt1yx, pt1yy,
-                pt1zx, pt1zy
+            (pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, pt1zy) = _ECTwistDoubleJacobian(
+                pt1xx,
+                pt1xy,
+                pt1yx,
+                pt1yy,
+                pt1zx,
+                pt1zy
             );
 
             d = d / 2;
         }
     }
 }
-
 
 // This file is MIT Licensed.
 //
@@ -397,40 +471,52 @@ library BN256G2 {
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 pragma solidity ^0.5.0;
+
 library Pairing {
     struct G1Point {
-        uint X;
-        uint Y;
+        uint256 X;
+        uint256 Y;
     }
     // Encoding of field elements is: X[0] * z + X[1]
     struct G2Point {
-        uint[2] X;
-        uint[2] Y;
+        uint256[2] X;
+        uint256[2] Y;
     }
+
     /// @return the generator of G1
-    function P1() pure internal returns (G1Point memory) {
+    function P1() internal pure returns (G1Point memory) {
         return G1Point(1, 2);
     }
+
     /// @return the generator of G2
-    function P2() pure internal returns (G2Point memory) {
-        return G2Point(
-            [11559732032986387107991004021392285783925812861821192530917403151452391805634,
-             10857046999023057135944570762232829481370756359578518086990519993285655852781],
-            [4082367875863433681332203403145435568316851327593401208105741076214120093531,
-             8495653923123431417604973247489272438418190587263600148770280649306958101930]
-        );
+    function P2() internal pure returns (G2Point memory) {
+        return
+            G2Point(
+                [
+                    11559732032986387107991004021392285783925812861821192530917403151452391805634,
+                    10857046999023057135944570762232829481370756359578518086990519993285655852781
+                ],
+                [
+                    4082367875863433681332203403145435568316851327593401208105741076214120093531,
+                    8495653923123431417604973247489272438418190587263600148770280649306958101930
+                ]
+            );
     }
+
     /// @return the negation of p, i.e. p.addition(p.negate()) should be zero.
-    function negate(G1Point memory p) pure internal returns (G1Point memory) {
+    function negate(G1Point memory p) internal pure returns (G1Point memory) {
         // The prime q in the base field F_q for G1
-        uint q = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
-        if (p.X == 0 && p.Y == 0)
-            return G1Point(0, 0);
+        uint256 q = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
+        if (p.X == 0 && p.Y == 0) return G1Point(0, 0);
         return G1Point(p.X, q - (p.Y % q));
     }
+
     /// @return the sum of two points of G1
-    function addition(G1Point memory p1, G1Point memory p2) internal returns (G1Point memory r) {
-        uint[4] memory input;
+    function addition(G1Point memory p1, G1Point memory p2)
+        internal
+        returns (G1Point memory r)
+    {
+        uint256[4] memory input;
         input[0] = p1.X;
         input[1] = p1.Y;
         input[2] = p2.X;
@@ -439,18 +525,39 @@ library Pairing {
         assembly {
             success := call(sub(gas, 2000), 6, 0, input, 0xc0, r, 0x60)
             // Use "invalid" to make gas estimation work
-            switch success case 0 { invalid() }
+            switch success
+            case 0 {
+                invalid()
+            }
         }
         require(success);
     }
+
     /// @return the sum of two points of G2
-    function addition(G2Point memory p1, G2Point memory p2) internal pure returns (G2Point memory r) {
-        (r.X[1], r.X[0], r.Y[1], r.Y[0]) = BN256G2.ECTwistAdd(p1.X[1],p1.X[0],p1.Y[1],p1.Y[0],p2.X[1],p2.X[0],p2.Y[1],p2.Y[0]);
+    function addition(G2Point memory p1, G2Point memory p2)
+        internal
+        pure
+        returns (G2Point memory r)
+    {
+        (r.X[1], r.X[0], r.Y[1], r.Y[0]) = BN256G2.ECTwistAdd(
+            p1.X[1],
+            p1.X[0],
+            p1.Y[1],
+            p1.Y[0],
+            p2.X[1],
+            p2.X[0],
+            p2.Y[1],
+            p2.Y[0]
+        );
     }
+
     /// @return the product of a point on G1 and a scalar, i.e.
     /// p == p.scalar_mul(1) and p.addition(p) == p.scalar_mul(2) for all points p.
-    function scalar_mul(G1Point memory p, uint s) internal returns (G1Point memory r) {
-        uint[3] memory input;
+    function scalar_mul(G1Point memory p, uint256 s)
+        internal
+        returns (G1Point memory r)
+    {
+        uint256[3] memory input;
         input[0] = p.X;
         input[1] = p.Y;
         input[2] = s;
@@ -458,21 +565,27 @@ library Pairing {
         assembly {
             success := call(sub(gas, 2000), 7, 0, input, 0x80, r, 0x60)
             // Use "invalid" to make gas estimation work
-            switch success case 0 { invalid() }
+            switch success
+            case 0 {
+                invalid()
+            }
         }
-        require (success);
+        require(success);
     }
+
     /// @return the result of computing the pairing check
     /// e(p1[0], p2[0]) *  .... * e(p1[n], p2[n]) == 1
     /// For example pairing([P1(), P1().negate()], [P2(), P2()]) should
     /// return true.
-    function pairing(G1Point[] memory p1, G2Point[] memory p2) internal returns (bool) {
+    function pairing(G1Point[] memory p1, G2Point[] memory p2)
+        internal
+        returns (bool)
+    {
         require(p1.length == p2.length);
-        uint elements = p1.length;
-        uint inputSize = elements * 6;
-        uint[] memory input = new uint[](inputSize);
-        for (uint i = 0; i < elements; i++)
-        {
+        uint256 elements = p1.length;
+        uint256 inputSize = elements * 6;
+        uint256[] memory input = new uint256[](inputSize);
+        for (uint256 i = 0; i < elements; i++) {
             input[i * 6 + 0] = p1[i].X;
             input[i * 6 + 1] = p1[i].Y;
             input[i * 6 + 2] = p2[i].X[0];
@@ -480,18 +593,35 @@ library Pairing {
             input[i * 6 + 4] = p2[i].Y[0];
             input[i * 6 + 5] = p2[i].Y[1];
         }
-        uint[1] memory out;
+        uint256[1] memory out;
         bool success;
         assembly {
-            success := call(sub(gas, 2000), 8, 0, add(input, 0x20), mul(inputSize, 0x20), out, 0x20)
+            success := call(
+                sub(gas, 2000),
+                8,
+                0,
+                add(input, 0x20),
+                mul(inputSize, 0x20),
+                out,
+                0x20
+            )
             // Use "invalid" to make gas estimation work
-            switch success case 0 { invalid() }
+            switch success
+            case 0 {
+                invalid()
+            }
         }
         require(success);
         return out[0] != 0;
     }
+
     /// Convenience method for a pairing check for two pairs.
-    function pairingProd2(G1Point memory a1, G2Point memory a2, G1Point memory b1, G2Point memory b2) internal returns (bool) {
+    function pairingProd2(
+        G1Point memory a1,
+        G2Point memory a2,
+        G1Point memory b1,
+        G2Point memory b2
+    ) internal returns (bool) {
         G1Point[] memory p1 = new G1Point[](2);
         G2Point[] memory p2 = new G2Point[](2);
         p1[0] = a1;
@@ -500,11 +630,15 @@ library Pairing {
         p2[1] = b2;
         return pairing(p1, p2);
     }
+
     /// Convenience method for a pairing check for three pairs.
     function pairingProd3(
-            G1Point memory a1, G2Point memory a2,
-            G1Point memory b1, G2Point memory b2,
-            G1Point memory c1, G2Point memory c2
+        G1Point memory a1,
+        G2Point memory a2,
+        G1Point memory b1,
+        G2Point memory b2,
+        G1Point memory c1,
+        G2Point memory c2
     ) internal returns (bool) {
         G1Point[] memory p1 = new G1Point[](3);
         G2Point[] memory p2 = new G2Point[](3);
@@ -516,12 +650,17 @@ library Pairing {
         p2[2] = c2;
         return pairing(p1, p2);
     }
+
     /// Convenience method for a pairing check for four pairs.
     function pairingProd4(
-            G1Point memory a1, G2Point memory a2,
-            G1Point memory b1, G2Point memory b2,
-            G1Point memory c1, G2Point memory c2,
-            G1Point memory d1, G2Point memory d2
+        G1Point memory a1,
+        G2Point memory a2,
+        G1Point memory b1,
+        G2Point memory b2,
+        G1Point memory c1,
+        G2Point memory c2,
+        G1Point memory d1,
+        G2Point memory d2
     ) internal returns (bool) {
         G1Point[] memory p1 = new G1Point[](4);
         G2Point[] memory p2 = new G2Point[](4);
@@ -540,55 +679,247 @@ library Pairing {
 contract Verifier {
     using Pairing for *;
     struct VerifyingKey {
-        Pairing.G1Point a;
-        Pairing.G2Point b;
+        Pairing.G2Point A;
+        Pairing.G1Point B;
+        Pairing.G2Point C;
         Pairing.G2Point gamma;
-        Pairing.G2Point delta;
-        Pairing.G1Point[] gammaABC;
+        Pairing.G1Point gammaBeta1;
+        Pairing.G2Point gammaBeta2;
+        Pairing.G2Point Z;
+        Pairing.G1Point[] IC;
     }
     struct Proof {
         Pairing.G1Point A;
+        Pairing.G1Point A_p;
         Pairing.G2Point B;
+        Pairing.G1Point B_p;
         Pairing.G1Point C;
+        Pairing.G1Point C_p;
+        Pairing.G1Point K;
+        Pairing.G1Point H;
     }
-    function verifyingKey() pure internal returns (VerifyingKey memory vk) {
-        vk.a = Pairing.G1Point(uint256(0x0ca18b7517189971f06fd2db13b36d701ca0deef46ee44cb2c0aa7e3dfef674c), uint256(0x20eea947f5f8cd431f24676b0408db7b6c446a0da5bb23069709e8510e4351b4));
-        vk.b = Pairing.G2Point([uint256(0x2205e08ab73b6ad6e7098ed859252d6c505896aaf9910556ae428672d4e656b3), uint256(0x2e75d8c3d77db4f4ce38c31c8c96f5fd1b783f4b723acea3ed228cdd2644cd23)], [uint256(0x247e7e69e0197b0bf5c4956880a66ce930a0ef8cc65ffcd1859ec971c0bef34b), uint256(0x2b6ec60c74819bdeae4df51ac3dbb66e7272a7da1fa6210a48240fe2b03eed49)]);
-        vk.gamma = Pairing.G2Point([uint256(0x0e0584d0c57d66d799bd889099db47f03fc24bd86b61f10d0f4f4fffe326fe80), uint256(0x0fa04082c1e3b93bb38886d4224be767220a97d85413454ecc98cc39df452985)], [uint256(0x24e7ed90d3befd2c6f700e282dfddd9ef1d7caba2fdd58da86f2b3af831d56b0), uint256(0x2803e46628f6b0ee52ac312cee06c596e8023896e0ea0276bd606293bc86d524)]);
-        vk.delta = Pairing.G2Point([uint256(0x19090690dbc63d35e698c9e4ea159ca50b33aafdab319e4128c7a6dc9db5ff5a), uint256(0x2e873e0ea8abcce447d2662332e99d402aa27869b940335d782d81fef9676c78)], [uint256(0x1823cf460b15afd1ffc729b2d85188ef990d013336583e56170a18d20516446e), uint256(0x07fd1527158a5fc0efeacc84dc8f5fb7f4f6613ca01f9379650c49f926618d5d)]);
-        vk.gammaABC = new Pairing.G1Point[](3);
-        vk.gammaABC[0] = Pairing.G1Point(uint256(0x018aee58cbcd3bad8b814740b4016966dc06e8d02169923c9877220e8f697e63), uint256(0x2513de9cd3e55a37431cba2c1e523386448841e7cde09358cc80c93045e2f8ef));
-        vk.gammaABC[1] = Pairing.G1Point(uint256(0x02b30ceced3cfa6c2778fbbbe9b57eb9d33471e5ddc5c2de1c934a740209711b), uint256(0x2ba09f26acf1c002d505a166007339313cc97582b1e05729b84a8975241413a2));
-        vk.gammaABC[2] = Pairing.G1Point(uint256(0x1886a83c621b483dfd0105d054617e41304ed2f09758e8a29f87920f2d6d746e), uint256(0x0b6310b87e58aabcc1298d92b26c15bef72e2e1302c1862b3ec79449444bbdaa));
+
+    function verifyingKey() internal pure returns (VerifyingKey memory vk) {
+        vk.A = Pairing.G2Point(
+            [
+                uint256(
+                    0x168643a7f197493636891038d2dab27d98d565dded1ae30144a388427e19b866
+                ),
+                uint256(
+                    0x05899bdd1cc267519e5ec1ac61fb94b42cd4dd51a352da9d84272db22ef604de
+                )
+            ],
+            [
+                uint256(
+                    0x00621ea76d7fbc0f7bed6ff15cd823c533ee192ce42f8af59894d361739c9a61
+                ),
+                uint256(
+                    0x09e9657103560197a7a5ab179fe563f57dc2f911c4f02144d7503f8e49356dd1
+                )
+            ]
+        );
+        vk.B = Pairing.G1Point(
+            uint256(
+                0x10e7a0a8b91f7bd056918bc9d623a6684360fa23fb5bcdbe254416acb18120f6
+            ),
+            uint256(
+                0x189179ec482e48589699353004b9a3c19a5df5be698b2d1ae7c886316bf1b5cb
+            )
+        );
+        vk.C = Pairing.G2Point(
+            [
+                uint256(
+                    0x195c5ee6486a2fa94805154f94131dc641b7a61e6c36ff6f9346b46b74c1e1ad
+                ),
+                uint256(
+                    0x11cc09900ff6ffca1dccba070f550b1494601fce39ff34975983b2b78c081cc4
+                )
+            ],
+            [
+                uint256(
+                    0x2d277f9a6926706c3ef68a88b88d0e18b1ff4c31849732f3494089489498a29c
+                ),
+                uint256(
+                    0x212ad5e29ba72b9264dbdc1fe6bdc87c0877800f593d5163be1bd82b550cdba0
+                )
+            ]
+        );
+        vk.gamma = Pairing.G2Point(
+            [
+                uint256(
+                    0x0146906928186306066eabe9b866f3a9161165bc44d8411d43e1c07789c4427e
+                ),
+                uint256(
+                    0x2f03fec2435aff676831d6cc343f0faa93bd8d173cb684e6cb5b52a44600915a
+                )
+            ],
+            [
+                uint256(
+                    0x1f4176583403f6dae016b672bcf2acc316f715c0c0964a11b90f04134cce23d5
+                ),
+                uint256(
+                    0x2ce9fa30ce067e1a437d7a4efe883538dc25e9f7ca651a0c30b2f74e23f8a6ab
+                )
+            ]
+        );
+        vk.gammaBeta1 = Pairing.G1Point(
+            uint256(
+                0x0fd5e5e8913d86c88be62228e4358ce5262385248f9d7aa3f343d9001354d47e
+            ),
+            uint256(
+                0x1915d40a2616318e9d0809997d4be731a316398c6c50220291897aa5a130dc0d
+            )
+        );
+        vk.gammaBeta2 = Pairing.G2Point(
+            [
+                uint256(
+                    0x05c3b009228dfe43d1b84fd9f61a59591437bd0cb9747b518f3cb0d74a91422f
+                ),
+                uint256(
+                    0x068b92fc817255dd02f8e3ca8b04673ca299031342311d62eed450045cedf517
+                )
+            ],
+            [
+                uint256(
+                    0x21460a7ff3270da51247a06faf7b0405d89775015baa1d3295fb38dea04ebf6b
+                ),
+                uint256(
+                    0x081de27587a2270b872641650cb01f7797f628acd0e6ad293596048d2c9e7956
+                )
+            ]
+        );
+        vk.Z = Pairing.G2Point(
+            [
+                uint256(
+                    0x16cfeb99e25ec94a3e649296ca4c1aac97b90897d4b41c8f7ebf4a84bb9a510f
+                ),
+                uint256(
+                    0x148428ca24d85c6787cc77f433bd6bf9be01b60a3a6dc6e463b325f8ed2539eb
+                )
+            ],
+            [
+                uint256(
+                    0x0b898bb699655cd319aae4ce9126b280eca7516e547b34c4cd3423481c67a2fd
+                ),
+                uint256(
+                    0x212bbbd5b8b928bc764c7fcc44d628d487b184f6688b2acbcdef5f6d9d437c18
+                )
+            ]
+        );
+        vk.IC = new Pairing.G1Point[](3);
+        vk.IC[0] = Pairing.G1Point(
+            uint256(
+                0x0e6f8e35dfdc197b46de20dd90413e4417ba11de7331d7ae164390bbfb289dd4
+            ),
+            uint256(
+                0x06c41f8a9947ddce3c8dd61f6dc87970723477c0adafb9613f82a823098b3555
+            )
+        );
+        vk.IC[1] = Pairing.G1Point(
+            uint256(
+                0x135ef9b4ebb564c37c57890f93611677a8ca20c071bd3d72232e47235aaab460
+            ),
+            uint256(
+                0x10a7055b96147ab8752af2642bf69e00f756a65f85e0d7a42c60144fc94847f2
+            )
+        );
+        vk.IC[2] = Pairing.G1Point(
+            uint256(
+                0x2b34a92affe8d84b847051bb168648803fdece1b7b92bcfec1fd0aa9e80ab6b6
+            ),
+            uint256(
+                0x155545cee9693d38a207383e8a1505155c9fcf597aa54bf8c0d74f65f70b9a07
+            )
+        );
     }
-    function verify(uint[] memory input, Proof memory proof) internal returns (uint) {
+
+    function verify(uint256[] memory input, Proof memory proof)
+        internal
+        returns (uint256)
+    {
         VerifyingKey memory vk = verifyingKey();
-        require(input.length + 1 == vk.gammaABC.length);
+        require(input.length + 1 == vk.IC.length);
         // Compute the linear combination vk_x
         Pairing.G1Point memory vk_x = Pairing.G1Point(0, 0);
-        for (uint i = 0; i < input.length; i++)
-            vk_x = Pairing.addition(vk_x, Pairing.scalar_mul(vk.gammaABC[i + 1], input[i]));
-        vk_x = Pairing.addition(vk_x, vk.gammaABC[0]);
-        if(!Pairing.pairingProd4(
-             proof.A, proof.B,
-             Pairing.negate(vk_x), vk.gamma,
-             Pairing.negate(proof.C), vk.delta,
-             Pairing.negate(vk.a), vk.b)) return 1;
+        for (uint256 i = 0; i < input.length; i++)
+            vk_x = Pairing.addition(
+                vk_x,
+                Pairing.scalar_mul(vk.IC[i + 1], input[i])
+            );
+        vk_x = Pairing.addition(vk_x, vk.IC[0]);
+        if (
+            !Pairing.pairingProd2(
+                proof.A,
+                vk.A,
+                Pairing.negate(proof.A_p),
+                Pairing.P2()
+            )
+        ) return 1;
+        if (
+            !Pairing.pairingProd2(
+                vk.B,
+                proof.B,
+                Pairing.negate(proof.B_p),
+                Pairing.P2()
+            )
+        ) return 2;
+        if (
+            !Pairing.pairingProd2(
+                proof.C,
+                vk.C,
+                Pairing.negate(proof.C_p),
+                Pairing.P2()
+            )
+        ) return 3;
+        if (
+            !Pairing.pairingProd3(
+                proof.K,
+                vk.gamma,
+                Pairing.negate(
+                    Pairing.addition(vk_x, Pairing.addition(proof.A, proof.C))
+                ),
+                vk.gammaBeta2,
+                Pairing.negate(vk.gammaBeta1),
+                proof.B
+            )
+        ) return 4;
+        if (
+            !Pairing.pairingProd3(
+                Pairing.addition(vk_x, proof.A),
+                proof.B,
+                Pairing.negate(proof.H),
+                vk.Z,
+                Pairing.negate(proof.C),
+                Pairing.P2()
+            )
+        ) return 5;
         return 0;
     }
+
     event Verified(string s);
+
     function verifyTx(
-            uint[2] memory a,
-            uint[2][2] memory b,
-            uint[2] memory c,
-            uint[2] memory input
-        ) public returns (bool r) {
+        uint256[2] memory a,
+        uint256[2] memory a_p,
+        uint256[2][2] memory b,
+        uint256[2] memory b_p,
+        uint256[2] memory c,
+        uint256[2] memory c_p,
+        uint256[2] memory h,
+        uint256[2] memory k,
+        uint256[2] memory input
+    ) public returns (bool r) {
         Proof memory proof;
         proof.A = Pairing.G1Point(a[0], a[1]);
+        proof.A_p = Pairing.G1Point(a_p[0], a_p[1]);
         proof.B = Pairing.G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
+        proof.B_p = Pairing.G1Point(b_p[0], b_p[1]);
         proof.C = Pairing.G1Point(c[0], c[1]);
-        uint[] memory inputValues = new uint[](input.length);
-        for(uint i = 0; i < input.length; i++){
+        proof.C_p = Pairing.G1Point(c_p[0], c_p[1]);
+        proof.H = Pairing.G1Point(h[0], h[1]);
+        proof.K = Pairing.G1Point(k[0], k[1]);
+        uint256[] memory inputValues = new uint256[](input.length);
+        for (uint256 i = 0; i < input.length; i++) {
             inputValues[i] = input[i];
         }
         if (verify(inputValues, proof) == 0) {

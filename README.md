@@ -37,7 +37,9 @@ This project is deployed to the rinkeby test network:
 
 - Token Name: *RealEstateToken*
 - Token Symbol: *RST*
-- Contract address: [0xEB6f785407218E4f0344D4ec72fC572095C48EDf](https://rinkeby.etherscan.io/address/0xEB6f785407218E4f0344D4ec72fC572095C48EDf)
+- SolnSquareVerifier address: [0xEB6f785407218E4f0344D4ec72fC572095C48EDf](https://rinkeby.etherscan.io/address/0xEB6f785407218E4f0344D4ec72fC572095C48EDf)
+- Verifier address: [0xAd22F1ad9904310458d98dbAcdae5823b63943e0](https://rinkeby.etherscan.io/address/0xad22f1ad9904310458d98dbacdae5823b63943e0)
+
 
 ## OpenSea
 
